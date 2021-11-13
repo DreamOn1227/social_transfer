@@ -1,0 +1,106 @@
+import 'dart:io';
+
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/material.dart';
+import 'package:killacam_social/widgets/upload_page_app_bar.dart';
+
+import 'brand_linear_progress.dart';
+import 'current_location_button.dart';
+
+class UploadForm extends StatelessWidget {
+  const UploadForm({
+    Key? key,
+    required this.captionController,
+    required this.contentImage,
+    required this.isUploading,
+    required this.locationController,
+    required this.onPressedClear,
+    required this.onPressedLocation,
+    required this.onPressedPost,
+    required this.userPhotoUrl,
+  }) : super(key: key);
+
+  final TextEditingController captionController;
+  final File contentImage;
+  final bool isUploading;
+  final TextEditingController locationController;
+  final VoidCallback onPressedClear;
+  final VoidCallback onPressedLocation;
+  final VoidCallback? onPressedPost;
+  final String userPhotoUrl;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: UploadPageAppBar(
+        onPressedClear: onPressedClear,
+        onPressedPost: onPressedPost,
+      ),
+      body: ListView(
+        children: [
+          isUploading ? const BrandLinearProgress() : const Text(''),
+          SizedBox(
+            height: 220.0,
+            width: MediaQuery.of(context).size.width * 0.8,
+            child: Center(
+              child: AspectRatio(
+                aspectRatio: 16 / 9,
+                child: Container(
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      fit: BoxFit.cover,
+                      image: FileImage(
+                        contentImage,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(
+            height: 10.0,
+          ),
+          ListTile(
+            leading: CircleAvatar(
+              backgroundImage: CachedNetworkImageProvider(
+                userPhotoUrl,
+              ),
+            ),
+            title: SizedBox(
+              width: 250.0,
+              child: TextField(
+                controller: captionController,
+                decoration: const InputDecoration(
+                  border: InputBorder.none,
+                  hintText: 'Write a caption...',
+                ),
+              ),
+            ),
+          ),
+          const Divider(),
+          ListTile(
+            leading: const Icon(
+              Icons.pin_drop,
+              color: Colors.orange,
+              size: 35.0,
+            ),
+            title: SizedBox(
+              width: 250.0,
+              child: TextField(
+                controller: locationController,
+                decoration: const InputDecoration(
+                  border: InputBorder.none,
+                  hintText: 'Where was this photo taken?',
+                ),
+              ),
+            ),
+          ),
+          CurrentLocationButton(
+            onPressed: onPressedLocation,
+          ),
+        ],
+      ),
+    );
+  }
+}
