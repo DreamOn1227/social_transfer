@@ -1,0 +1,35 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:killacam_social/pages/home_page.dart';
+
+class UserPost {
+  UserPost({
+    required this.postId,
+    required this.ownerId,
+    required this.userName,
+    this.location,
+    this.description,
+    required this.mediaUrl,
+    this.likes,
+  });
+
+  final String? currentUserId = currentUser?.id;
+  final String postId;
+  final String ownerId;
+  final String userName;
+  final String? location;
+  final String? description;
+  final String mediaUrl;
+  final dynamic likes;
+
+  factory UserPost.fromDocument(DocumentSnapshot doc) {
+    return UserPost(
+      postId: doc['postId'],
+      ownerId: doc['ownerId'],
+      userName: doc['userName'],
+      location: doc['location'],
+      description: doc['description'],
+      mediaUrl: doc['mediaUrl'],
+      likes: doc['likes'],
+    );
+  }
+}
