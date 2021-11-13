@@ -1,0 +1,315 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+import 'package:killacam_social/models/app_user.dart';
+import 'package:killacam_social/widgets/brand_circular_progress.dart';
+import 'package:killacam_social/widgets/empty_content_for_profile.dart';
+import 'package:killacam_social/widgets/header.dart';
+import 'package:killacam_social/widgets/post.dart';
+import 'package:killacam_social/widgets/post_tile.dart';
+import 'package:killacam_social/widgets/profile_header_content.dart';
+import 'package:killacam_social/widgets/toggle_post_orientation.dart';
+
+import 'edit_profile_page.dart';
+import 'home_page.dart';
+
+class ProfilePage extends StatefulWidget {
+  const ProfilePage({
+    Key? key,
+    this.profileId,
+  }) : super(key: key);
+
+  final String? profileId;
+
+  @override
+  _ProfilePageState createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  bool isFollowing = false;
+  final String? currentUserId = currentUser?.id;
+  String postOrientation = 'grid';
+  bool isLoading = false;
+  int postCount = 0;
+  int followerCount = 0;
+  int followingCount = 0;
+  List<Post> posts = [];
+
+  @override
+  void initState() {
+    super.initState();
+    getProfilePosts();
+    getFollowers();
+    getFollowing();
+    checkIfFollowing();
+  }
+
+  Future checkIfFollowing() async {
+    DocumentSnapshot doc = await followersRef
+        .doc(
+          widget.profileId,
+        )
+        .collection('userFollowers')
+        .doc(currentUserId)
+        .get();
+    setState(() {
+      isFollowing = doc.exists;
+    });
+  }
+
+  Future getFollowers() async {
+    QuerySnapshot snapshot = await followersRef
+        .doc(
+          widget.profileId,
+        )
+        .collection('userFollowers')
+        .get();
+    setState(() {
+      followerCount = snapshot.docs.length;
+    });
+  }
+
+  Future getFollowing() async {
+    QuerySnapshot snapshot = await followingRef
+        .doc(
+          widget.profileId,
+        )
+        .collection('userFollowing')
+        .get();
+    setState(() {
+      followingCount = snapshot.docs.length;
+    });
+  }
+
+  Future getProfilePosts() async {
+    setState(() {
+      isLoading = true;
+    });
+    QuerySnapshot snapshot = await postsRef
+        .doc(
+          widget.profileId,
+        )
+        .collection('userPosts')
+        .orderBy(
+          'timestamp',
+          descending: true,
+        )
+        .get();
+    setState(() {
+      isLoading = false;
+      postCount = snapshot.docs.length;
+      posts = snapshot.docs
+          .map(
+            (doc) => Post.fromDocument(doc),
+          )
+          .toList();
+    });
+  }
+
+  void editProfile() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditProfilePage(
+          currentUserId: currentUserId,
+        ),
+      ),
+    );
+  }
+
+  Container buildButton({
+    required String text,
+    required VoidCallback function,
+  }) {
+    return Container(
+      padding: const EdgeInsets.only(top: 2.0),
+      child: TextButton(
+        onPressed: function,
+        child: Container(
+          width: 250.0,
+          height: 27.0,
+          child: Text(
+            text,
+            style: TextStyle(
+              color: isFollowing ? Colors.black : Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: isFollowing ? Colors.white : const Color(0xff271c3b),
+            border: Border.all(
+              color: isFollowing ? Colors.grey : const Color(0xff271c3b),
+            ),
+            borderRadius: BorderRadius.circular(5.0),
+          ),
+        ),
+      ),
+    );
+  }
+
+  buildProfileButton() {
+    bool isProfileOwner = currentUserId == widget.profileId;
+    if (isProfileOwner) {
+      return buildButton(
+        text: "Edit Profile",
+        function: editProfile,
+      );
+    } else if (isFollowing) {
+      return buildButton(
+        text: "Unfollow",
+        function: handleUnfollowUser,
+      );
+    } else if (!isFollowing) {
+      return buildButton(
+        text: "Follow",
+        function: handleFollowUser,
+      );
+    }
+  }
+
+  handleUnfollowUser() {
+    setState(() {
+      isFollowing = false;
+    });
+    followersRef
+        .doc(widget.profileId)
+        .collection('userFollowers')
+        .doc(currentUserId)
+        .get()
+        .then((doc) {
+      if (doc.exists) {
+        doc.reference.delete();
+      }
+    });
+    followingRef
+        .doc(currentUserId)
+        .collection('userFollowing')
+        .doc(widget.profileId)
+        .get()
+        .then((doc) {
+      if (doc.exists) {
+        doc.reference.delete();
+      }
+    });
+    activityFeedRef
+        .doc(widget.profileId)
+        .collection('feedItems')
+        .doc(currentUserId)
+        .get()
+        .then((doc) {
+      if (doc.exists) {
+        doc.reference.delete();
+      }
+    });
+  }
+
+  handleFollowUser() {
+    setState(() {
+      isFollowing = true;
+    });
+    followersRef
+        .doc(widget.profileId)
+        .collection('userFollowers')
+        .doc(currentUserId)
+        .set({});
+    followingRef
+        .doc(currentUserId)
+        .collection('userFollowing')
+        .doc(widget.profileId)
+        .set({});
+    activityFeedRef
+        .doc(widget.profileId)
+        .collection('feedItems')
+        .doc(currentUserId)
+        .set({
+      'type': 'follow',
+      'ownerId': widget.profileId,
+      'userName': currentUser?.userName,
+      'userId': currentUserId,
+      'userProfileImg': currentUser?.photoUrl,
+      'timestamp': timestamp,
+    });
+  }
+
+  buildProfileHeader() {
+    return StreamBuilder<DocumentSnapshot<Object>>(
+        stream: usersRef.doc(widget.profileId).snapshots(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return const BrandCircularProgress();
+          }
+          AppUser user = AppUser.fromDocument(snapshot.data);
+          return ProfileHeaderContent(
+            bioText: user.bio,
+            displayNameText: user.displayName,
+            followersCount: followerCount,
+            followingCount: followingCount,
+            photoUrl: user.photoUrl,
+            postCount: postCount,
+            userNameText: user.userName,
+            profileButton: buildProfileButton(),
+          );
+        });
+  }
+
+  setPostOrientation(String postOrientation) {
+    setState(() {
+      this.postOrientation = postOrientation;
+    });
+  }
+
+  Widget buildProfilePosts() {
+    if (isLoading) {
+      return const BrandCircularProgress();
+    } else if (posts.isEmpty) {
+      return const EmptyContentForProfile();
+    } else if (postOrientation == 'grid') {
+      List<GridTile> gridTiles = [];
+      posts.forEach((post) {
+        gridTiles.add(GridTile(child: PostTile(post: post)));
+      });
+      return GridView.count(
+        childAspectRatio: 1.0,
+        crossAxisCount: 3,
+        crossAxisSpacing: 1.5,
+        mainAxisSpacing: 1.5,
+        physics: const NeverScrollableScrollPhysics(),
+        shrinkWrap: true,
+        children: gridTiles,
+      );
+    } else {
+      return Column(
+        children: posts,
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: const Header(
+        title: 'Profile',
+      ),
+      body: ListView(
+        children: <Widget>[
+          buildProfileHeader(),
+          const Divider(),
+          TogglePostOrientation(
+            gridColor: postOrientation == 'grid'
+                ? const Color(0xff271c3b)
+                : Colors.grey,
+            listColor: postOrientation == 'list'
+                ? const Color(0xff271c3b)
+                : Colors.grey,
+            onPressedGrid: () => setPostOrientation('grid'),
+            onPressedList: () => setPostOrientation('list'),
+          ),
+          const Divider(
+            height: 0.0,
+          ),
+          buildProfilePosts(),
+        ],
+      ),
+    );
+  }
+}
