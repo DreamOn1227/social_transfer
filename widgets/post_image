@@ -1,0 +1,29 @@
+import 'package:flutter/material.dart';
+
+import 'custom_image.dart';
+
+class PostImage extends StatelessWidget {
+  const PostImage({
+    Key? key,
+    required this.handleLikePost,
+    required this.mediaUrl,
+  }) : super(key: key);
+
+  final VoidCallback handleLikePost;
+  final String mediaUrl;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onDoubleTap: handleLikePost,
+      child: Stack(
+        alignment: Alignment.center,
+        children: <Widget>[
+          CustomImage(
+            mediaUrl: mediaUrl,
+          ),
+        ],
+      ),
+    );
+  }
+}
