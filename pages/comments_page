@@ -1,0 +1,177 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+import 'package:killacam_social/widgets/brand_circular_progress.dart';
+import 'package:killacam_social/widgets/header.dart';
+import 'package:timeago/timeago.dart' as timeago;
+
+import 'home_page.dart';
+
+class CommentsPage extends StatefulWidget {
+  const CommentsPage({
+    Key? key,
+    required this.postId,
+    required this.postOwnerId,
+    required this.postMediaUrl,
+  }) : super(key: key);
+
+  final String postId;
+  final String postOwnerId;
+  final String postMediaUrl;
+
+  @override
+  CommentsPageState createState() => CommentsPageState(
+        postId: postId,
+        postOwnerId: postOwnerId,
+        postMediaUrl: postMediaUrl,
+      );
+}
+
+class CommentsPageState extends State<CommentsPage> {
+  CommentsPageState({
+    // Key? key,
+    required this.postId,
+    required this.postOwnerId,
+    required this.postMediaUrl,
+  });
+
+  TextEditingController commentController = TextEditingController();
+  final String postId;
+  final String postOwnerId;
+  final String postMediaUrl;
+
+  addComment() {
+    commentsRef.doc(postId).collection('comments').add({
+      'userName': currentUser?.userName,
+      'comment': commentController.text,
+      'timestamp': timestamp,
+      'avatarUrl': currentUser?.photoUrl,
+      'userId': currentUser?.id,
+    });
+    bool isNotPostOwner = postOwnerId != currentUser?.id;
+    if (isNotPostOwner) {
+      activityFeedRef.doc(postOwnerId).collection('feedItems').add({
+        'type': 'comment',
+        'commentData': commentController.text,
+        'postId': postId,
+        'timestamp': timestamp,
+        'userName': currentUser?.userName,
+        'userId': currentUser?.id,
+        'userProfileImg': currentUser?.photoUrl,
+        'mediaUrl': postMediaUrl,
+      });
+    }
+
+    commentController.clear();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: const Header(
+        title: 'Comments',
+      ),
+      body: Column(
+        children: <Widget>[
+          Expanded(
+            child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+              stream: commentsRef
+                  .doc(postId)
+                  .collection('comments')
+                  .orderBy('timestamp', descending: true)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return const BrandCircularProgress();
+                }
+
+                List<Comment> comments = [];
+                snapshot.data?.docs.forEach((doc) {
+                  comments.add(
+                    Comment.fromDocument(doc),
+                  );
+                });
+                return ListView(
+                  children: comments,
+                );
+              },
+            ),
+          ),
+          // Divider(
+          //   color: Colors.black87.withOpacity(0.30),
+          // ),
+          ListTile(
+            title: TextFormField(
+              controller: commentController,
+              decoration: InputDecoration(
+                fillColor: Colors.grey[200],
+                filled: true,
+                border: const UnderlineInputBorder(),
+                labelText: 'Write a Comment...',
+                prefixIcon: const Icon(
+                  Icons.comment,
+                  color: Color(0xff271c3b),
+                ),
+              ),
+            ),
+            trailing: ElevatedButton(
+                onPressed: addComment,
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all(
+                    const Color(0xff271c3b),
+                  ),
+                ),
+                child: const Text(
+                  'Post',
+                )),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class Comment extends StatelessWidget {
+  const Comment({
+    Key? key,
+    required this.userName,
+    required this.userId,
+    required this.avatarUrl,
+    this.comment,
+    required this.timestamp,
+  }) : super(key: key);
+
+  final String userName;
+  final String userId;
+  final String avatarUrl;
+  final String? comment;
+  final Timestamp timestamp;
+
+  factory Comment.fromDocument(DocumentSnapshot doc) {
+    return Comment(
+      userName: doc['userName'],
+      userId: doc['userId'],
+      comment: doc['comment'],
+      timestamp: doc['timestamp'],
+      avatarUrl: doc['avatarUrl'],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        ListTile(
+          leading: CircleAvatar(
+            backgroundImage: CachedNetworkImageProvider(avatarUrl),
+          ),
+          subtitle: Text(timeago.format(timestamp.toDate())),
+          title: Text(comment!),
+        ),
+        Divider(
+          color: Colors.black87.withOpacity(0.30),
+        ),
+      ],
+    );
+  }
+}
