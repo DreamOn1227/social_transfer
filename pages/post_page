@@ -1,0 +1,43 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+import 'package:killacam_social/widgets/brand_circular_progress.dart';
+import 'package:killacam_social/widgets/header.dart';
+import 'package:killacam_social/widgets/post.dart';
+
+import 'home_page.dart';
+
+class PostPage extends StatelessWidget {
+  const PostPage({
+    Key? key,
+    required this.postId,
+    required this.userId,
+  }) : super(key: key);
+
+  final String postId;
+  final String userId;
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<DocumentSnapshot>(
+      future: postsRef.doc(userId).collection('userPosts').doc(postId).get(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const BrandCircularProgress();
+        }
+        Post post = Post.fromDocument(snapshot.data!);
+        return Center(
+          child: Scaffold(
+            appBar: Header(title: post.description!),
+            body: ListView(
+              children: [
+                Container(
+                  child: post,
+                )
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
