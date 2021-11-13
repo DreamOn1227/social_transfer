@@ -1,0 +1,50 @@
+import 'package:flutter/material.dart';
+
+class UploadPageAppBar extends StatelessWidget implements PreferredSizeWidget {
+  const UploadPageAppBar({
+    Key? key,
+    required this.onPressedClear,
+    required this.onPressedPost,
+  }) : super(key: key);
+
+  final VoidCallback onPressedClear;
+  final VoidCallback? onPressedPost;
+
+  @override
+  Widget build(BuildContext context) {
+    return AppBar(
+      actions: [
+        TextButton(
+          onPressed: onPressedPost,
+          child: const Text(
+            'Post',
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ],
+      backgroundColor: const Color(0xff271c3b),
+      leading: IconButton(
+        icon: const Icon(
+          Icons.arrow_back,
+          color: Colors.white,
+        ),
+        onPressed: onPressedClear,
+      ),
+      title: const Text(
+        'Caption Post',
+        style: TextStyle(
+          color: Colors.white,
+        ),
+      ),
+    );
+  }
+
+  @override
+  Size get preferredSize => const Size(
+        double.infinity,
+        56.0,
+      );
+}
