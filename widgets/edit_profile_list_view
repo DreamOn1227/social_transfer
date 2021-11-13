@@ -1,0 +1,69 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/material.dart';
+import 'package:killacam_social/widgets/profile_text_field.dart';
+
+class EditProfileListView extends StatelessWidget {
+  const EditProfileListView({
+    Key? key,
+    required this.bioController,
+    required this.displayNameController,
+    required this.errorTextBio,
+    required this.errorTextDisplayName,
+    required this.userPhotoUrl,
+  }) : super(key: key);
+
+  final TextEditingController bioController;
+
+  final TextEditingController displayNameController;
+  final String? errorTextBio;
+  final String? errorTextDisplayName;
+  final String userPhotoUrl;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      children: <Widget>[
+        Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(
+                top: 16.0,
+                bottom: 8.0,
+              ),
+              child: CircleAvatar(
+                backgroundImage: CachedNetworkImageProvider(
+                  userPhotoUrl,
+                ),
+                radius: 40.0,
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(
+                16.0,
+              ),
+              child: Column(
+                children: <Widget>[
+                  ProfileTextField(
+                    controller: displayNameController,
+                    errorText: errorTextDisplayName,
+                    hintText: 'Update Display Name',
+                    inputLabel: 'Display Name',
+                  ),
+                  ProfileTextField(
+                    controller: bioController,
+                    errorText: errorTextBio,
+                    hintText: 'Update Bio',
+                    inputLabel: 'Bio',
+                  ),
+                ],
+              ),
+            ),
+            // LogOutIconButton(
+            //   onPressed: logout,
+            // ),
+          ],
+        ),
+      ],
+    );
+  }
+}
