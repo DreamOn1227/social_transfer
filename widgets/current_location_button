@@ -1,0 +1,44 @@
+import 'package:flutter/material.dart';
+
+class CurrentLocationButton extends StatelessWidget {
+  const CurrentLocationButton({
+    Key? key,
+    required this.onPressed,
+  }) : super(key: key);
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      alignment: Alignment.center,
+      height: 100.0,
+      width: 200.0,
+      child: ElevatedButton.icon(
+        onPressed: onPressed,
+        icon: const Icon(
+          Icons.my_location,
+          color: Colors.white,
+        ),
+        label: const Text(
+          'Use current location',
+          style: TextStyle(
+            color: Colors.white,
+          ),
+        ),
+        style: ButtonStyle(
+          backgroundColor: MaterialStateProperty.all(
+            const Color(0xff271c3b),
+          ),
+          shape: MaterialStateProperty.all(
+            RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(
+                30.0,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
