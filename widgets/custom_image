@@ -1,0 +1,30 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/material.dart';
+
+cachedNetworkImage(mediaUrl) {
+  return const Text('cached network image');
+}
+
+class CustomImage extends StatelessWidget {
+  const CustomImage({
+    Key? key,
+    required this.mediaUrl,
+  }) : super(key: key);
+
+  final String? mediaUrl;
+
+  @override
+  Widget build(BuildContext context) {
+    return CachedNetworkImage(
+      errorWidget: (context, url, error) => const Icon(
+        Icons.error,
+      ),
+      fit: BoxFit.cover,
+      imageUrl: mediaUrl!,
+      placeholder: (context, url) => const Padding(
+        padding: EdgeInsets.all(20.0),
+        child: CircularProgressIndicator(),
+      ),
+    );
+  }
+}
