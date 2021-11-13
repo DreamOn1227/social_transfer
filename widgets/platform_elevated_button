@@ -1,0 +1,48 @@
+import 'dart:io';
+
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+
+class PlatformElevatedButton extends StatelessWidget {
+  const PlatformElevatedButton({
+    Key? key,
+    required this.buttonText,
+    this.onPressed,
+  }) : super(key: key);
+
+  final String buttonText;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    if (Platform.isIOS) {
+      return CupertinoButton(
+        borderRadius: BorderRadius.circular(
+          7.0,
+        ),
+        color: Theme.of(context).primaryColor,
+        onPressed: onPressed,
+        child: Text(
+          buttonText.toUpperCase(),
+        ),
+      );
+    } else {
+      return ElevatedButton(
+        onPressed: onPressed,
+        style: ButtonStyle(
+          backgroundColor: MaterialStateProperty.all(
+            Theme.of(context).primaryColor,
+          ),
+          shape: MaterialStateProperty.all(RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(
+              7.0,
+            ),
+          )),
+        ),
+        child: Text(
+          buttonText.toUpperCase(),
+        ),
+      );
+    }
+  }
+}
