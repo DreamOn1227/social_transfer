@@ -1,0 +1,43 @@
+import 'package:flutter/material.dart';
+import 'package:killacam_social/pages/activity_feed_page.dart';
+import 'package:killacam_social/pages/profile_page.dart';
+import 'package:killacam_social/pages/search_page.dart';
+import 'package:killacam_social/pages/upload_page.dart';
+
+class PlatformScaffold extends StatelessWidget {
+  const PlatformScaffold({
+    Key? key,
+    required this.bottomNavigationBar,
+    this.onLogOut,
+    required this.onPageChanged,
+    required this.pageController,
+  }) : super(key: key);
+
+  final Widget bottomNavigationBar;
+  final VoidCallback? onLogOut;
+  final void Function(int) onPageChanged;
+  final PageController pageController;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: PageView(
+        children: [
+          TextButton(
+            child: const Text('Logout'),
+            onPressed: onLogOut,
+          ),
+          // TimelinePage(),
+          const ActivityFeedPage(),
+          const UploadPage(),
+          const SearchPage(),
+          const ProfilePage(),
+        ],
+        controller: pageController,
+        onPageChanged: onPageChanged,
+        physics: const NeverScrollableScrollPhysics(),
+      ),
+      bottomNavigationBar: bottomNavigationBar,
+    );
+  }
+}
