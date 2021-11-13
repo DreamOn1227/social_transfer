@@ -1,0 +1,30 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+class AppUser {
+  AppUser({
+    required this.bio,
+    required this.displayName,
+    required this.email,
+    required this.id,
+    required this.photoUrl,
+    required this.userName,
+  });
+
+  final String bio;
+  final String displayName;
+  final String email;
+  final String id;
+  final String photoUrl;
+  final String userName;
+
+  factory AppUser.fromDocument(DocumentSnapshot? doc) {
+    return AppUser(
+      bio: doc?['bio'],
+      id: doc?['id'],
+      displayName: doc?['displayName'],
+      email: doc?['email'],
+      photoUrl: doc?['photoUrl'],
+      userName: doc?['userName'],
+    );
+  }
+}
