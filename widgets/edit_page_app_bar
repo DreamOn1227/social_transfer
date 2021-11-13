@@ -1,0 +1,39 @@
+import 'package:flutter/material.dart';
+
+class EditPageAppBar extends StatelessWidget implements PreferredSizeWidget {
+  const EditPageAppBar({
+    Key? key,
+    required this.onPressedUpdate,
+  }) : super(key: key);
+
+  final VoidCallback onPressedUpdate;
+  @override
+  Widget build(BuildContext context) {
+    return AppBar(
+      actions: [
+        TextButton(
+          onPressed: onPressedUpdate,
+          child: const Text(
+            'Update',
+            style: TextStyle(
+              color: Colors.white,
+            ),
+          ),
+        ),
+      ],
+      backgroundColor: const Color(0xff271c3b),
+      title: const Text(
+        'Edit Profile',
+        style: TextStyle(
+          color: Colors.white,
+        ),
+      ),
+    );
+  }
+
+  @override
+  Size get preferredSize => const Size(
+        double.infinity,
+        56.0,
+      );
+}
