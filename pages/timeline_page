@@ -1,0 +1,29 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+import 'package:killacam_social/widgets/header.dart';
+
+final usersRef = FirebaseFirestore.instance.collection('users');
+
+class TimelinePage extends StatefulWidget {
+  const TimelinePage({Key? key}) : super(key: key);
+
+  @override
+  _TimelinePageState createState() => _TimelinePageState();
+}
+
+class _TimelinePageState extends State<TimelinePage> {
+  @override
+  Widget build(context) {
+    return const Scaffold(
+      appBar: Header(
+        textStyle: TextStyle(
+          color: Colors.white,
+          fontFamily: 'Signatra',
+          fontSize: 50.0,
+        ),
+        title: 'Killa Cam Social',
+      ),
+      body: Text('Timeline'),
+    );
+  }
+}
