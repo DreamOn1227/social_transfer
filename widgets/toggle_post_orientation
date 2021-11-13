@@ -1,0 +1,39 @@
+import 'package:flutter/material.dart';
+
+class TogglePostOrientation extends StatelessWidget {
+  const TogglePostOrientation({
+    Key? key,
+    required this.gridColor,
+    required this.listColor,
+    required this.onPressedGrid,
+    required this.onPressedList,
+  }) : super(key: key);
+
+  final Color gridColor;
+  final Color listColor;
+  final VoidCallback onPressedGrid;
+  final VoidCallback onPressedList;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        IconButton(
+          onPressed: onPressedGrid,
+          icon: Icon(
+            Icons.grid_on,
+            color: gridColor,
+          ),
+        ),
+        IconButton(
+          onPressed: onPressedList,
+          icon: Icon(
+            Icons.list,
+            color: listColor,
+          ),
+        ),
+      ],
+    );
+  }
+}
