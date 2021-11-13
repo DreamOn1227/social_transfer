@@ -1,0 +1,43 @@
+import 'package:flutter/material.dart';
+
+class ProfileTextField extends StatelessWidget {
+  const ProfileTextField({
+    Key? key,
+    required this.controller,
+    required this.errorText,
+    required this.hintText,
+    required this.inputLabel,
+  }) : super(key: key);
+
+  final TextEditingController controller;
+  final String? errorText;
+  final String hintText;
+  final String inputLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(
+            top: 12.0,
+          ),
+          child: Text(
+            inputLabel,
+            style: const TextStyle(
+              color: Colors.grey,
+            ),
+          ),
+        ),
+        TextField(
+          controller: controller,
+          decoration: InputDecoration(
+            errorText: errorText,
+            hintText: hintText,
+          ),
+        ),
+      ],
+    );
+  }
+}
