@@ -1,0 +1,116 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/material.dart';
+
+import 'count_column.dart';
+
+class ProfileHeaderContent extends StatelessWidget {
+  const ProfileHeaderContent({
+    Key? key,
+    required this.bioText,
+    required this.displayNameText,
+    required this.followersCount,
+    required this.followingCount,
+    required this.photoUrl,
+    required this.postCount,
+    required this.userNameText,
+    required this.profileButton,
+  }) : super(key: key);
+
+  final String bioText;
+  final String displayNameText;
+  final int followersCount;
+  final int followingCount;
+  final String photoUrl;
+  final int postCount;
+  final String userNameText;
+  final Widget profileButton;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(
+        16.0,
+      ),
+      child: Column(
+        children: <Widget>[
+          Row(
+            children: <Widget>[
+              CircleAvatar(
+                radius: 40.0,
+                backgroundColor: Colors.grey,
+                backgroundImage: CachedNetworkImageProvider(
+                  photoUrl,
+                ),
+              ),
+              Expanded(
+                flex: 1,
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      mainAxisSize: MainAxisSize.max,
+                      children: <Widget>[
+                        CountColumn(
+                          count: postCount,
+                          label: 'posts',
+                        ),
+                        CountColumn(
+                          count: followersCount,
+                          label: 'followers',
+                        ),
+                        CountColumn(
+                          count: followingCount,
+                          label: 'following',
+                        ),
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        profileButton,
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          Container(
+            alignment: Alignment.centerLeft,
+            padding: const EdgeInsets.only(
+              top: 12.0,
+            ),
+            child: Text(
+              userNameText,
+              style: const TextStyle(
+                fontSize: 16.0,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          Container(
+            alignment: Alignment.centerLeft,
+            padding: const EdgeInsets.only(
+              top: 4.0,
+            ),
+            child: Text(
+              displayNameText,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          Container(
+            alignment: Alignment.centerLeft,
+            padding: const EdgeInsets.only(
+              top: 2.0,
+            ),
+            child: Text(
+              bioText,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
