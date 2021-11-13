@@ -1,0 +1,36 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
+
+class EmptyContentForProfile extends StatelessWidget {
+  /// Empty Content Posts class.
+  ///
+  /// It creates the content that is displayed on the user profile page when there aren't any posts.
+
+  const EmptyContentForProfile({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        SvgPicture.asset(
+          'assets/images/no_content.svg',
+          height: 260.0,
+        ),
+        const Padding(
+          padding: EdgeInsets.only(top: 20.0),
+          child: Text(
+            'No Posts',
+            style: TextStyle(
+              color: Colors.redAccent,
+              fontSize: 40.0,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
