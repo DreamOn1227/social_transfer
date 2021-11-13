@@ -1,0 +1,114 @@
+import 'dart:async';
+
+import 'package:flutter/material.dart';
+import 'package:killacam_social/widgets/header.dart';
+
+class CreateAccountPage extends StatefulWidget {
+  const CreateAccountPage({Key? key}) : super(key: key);
+
+  @override
+  _CreateAccountPageState createState() => _CreateAccountPageState();
+}
+
+class _CreateAccountPageState extends State<CreateAccountPage> {
+  final _formKey = GlobalKey<FormState>();
+  late String? userName;
+
+  submit() {
+    final form = _formKey.currentState;
+    if (form!.validate()) {
+      form.save();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Welcome $userName'),
+        ),
+      );
+      Timer(const Duration(seconds: 2), () {
+        Navigator.pop(
+          context,
+          userName,
+        );
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext parentContext) {
+    return Scaffold(
+      appBar: const Header(
+        automaticallyImplyLeading: false,
+        title: 'Set up your profile',
+      ),
+      body: ListView(
+        children: [
+          Column(
+            children: [
+              const Padding(
+                padding: EdgeInsets.only(
+                  top: 25.0,
+                ),
+                child: Center(
+                  child: Text(
+                    'Create a Username',
+                    style: TextStyle(
+                      fontSize: 25.0,
+                    ),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Form(
+                  key: _formKey,
+                  child: TextFormField(
+                    autovalidateMode: AutovalidateMode.always,
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      hintText: 'Must be at least three characters',
+                      labelText: 'Username',
+                      labelStyle: TextStyle(
+                        fontSize: 16.0,
+                      ),
+                    ),
+                    onSaved: (val) => userName = val,
+                    validator: (val) {
+                      if (val!.isEmpty) {
+                        return 'Username is required';
+                      } else if (val.trim().length < 3) {
+                        return 'Username is too short';
+                      } else if (val.trim().length > 12) {
+                        return 'Username is too long';
+                      } else {
+                        return null;
+                      }
+                    },
+                  ),
+                ),
+              ),
+              GestureDetector(
+                onTap: submit,
+                child: Container(
+                  height: 50.0,
+                  width: 350.0,
+                  decoration: BoxDecoration(
+                    color: Colors.deepPurple,
+                    borderRadius: BorderRadius.circular(7.0),
+                  ),
+                  child: Center(
+                    child: Text(
+                      'Submit'.toUpperCase(),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16.0,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
