@@ -1,0 +1,176 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/painting.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:killacam_social/models/app_user.dart';
+import 'package:killacam_social/pages/home_page.dart';
+import 'package:killacam_social/widgets/brand_circular_progress.dart';
+
+import 'activity_feed_page.dart';
+
+class SearchPage extends StatefulWidget {
+  const SearchPage({Key? key}) : super(key: key);
+
+  @override
+  _SearchPageState createState() => _SearchPageState();
+}
+
+class _SearchPageState extends State<SearchPage> {
+  TextEditingController searchController = TextEditingController();
+  Future<QuerySnapshot>? searchResultsFuture;
+
+  handleSearch(String query) {
+    Future<QuerySnapshot> users = usersRef
+        .where(
+          'displayName',
+          isGreaterThanOrEqualTo: query,
+        )
+        .get();
+    setState(() {
+      searchResultsFuture = users;
+    });
+  }
+
+  clearSearch() {
+    searchController.clear();
+  }
+
+  AppBar buildSearchField() {
+    return AppBar(
+      backgroundColor: Colors.white,
+      title: TextFormField(
+        // autofocus: true,
+        controller: searchController,
+        decoration: InputDecoration(
+          filled: true,
+          hintText: 'Search for a User...',
+          prefixIcon: const Icon(
+            Icons.account_box,
+          ),
+          suffixIcon: IconButton(
+            icon: const Icon(
+              Icons.clear,
+            ),
+            onPressed: clearSearch,
+          ),
+        ),
+        onFieldSubmitted: handleSearch,
+        textInputAction: TextInputAction.done,
+      ),
+    );
+  }
+
+  Widget buildNoContent() {
+    final Orientation orientation = MediaQuery.of(context).orientation;
+    return ListView(
+      shrinkWrap: true,
+      children: [
+        SvgPicture.asset(
+          'assets/images/search.svg',
+          height: orientation == Orientation.portrait ? 300 : 200,
+        ),
+        const Text(
+          'Find Users',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 60.0,
+            fontStyle: FontStyle.italic,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
+    );
+  }
+
+  buildSearchResults() {
+    return FutureBuilder<QuerySnapshot>(
+        future: searchResultsFuture,
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return const BrandCircularProgress();
+          }
+          List<UserResult> searchResults = [];
+          snapshot.data?.docs.forEach((doc) {
+            AppUser user = AppUser.fromDocument(doc);
+            UserResult searchResult = UserResult(
+              user: user,
+            );
+            searchResults.add(searchResult);
+          });
+
+          return ListView(
+            children: searchResults,
+          );
+        });
+  }
+
+  @override
+  void dispose() {
+    searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: buildSearchField(),
+      backgroundColor: Colors.deepPurple.withOpacity(0.8),
+      body:
+          searchResultsFuture == null ? buildNoContent() : buildSearchResults(),
+    );
+  }
+}
+
+class UserResult extends StatelessWidget {
+  const UserResult({
+    Key? key,
+    this.user,
+  }) : super(key: key);
+
+  final AppUser? user;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Colors.deepPurple.withOpacity(0.7),
+      child: Column(
+        children: [
+          GestureDetector(
+            onTap: () => showProfile(
+              context,
+              profileId: user!.id,
+            ),
+            child: ListTile(
+              leading: CircleAvatar(
+                backgroundColor: Colors.grey,
+                backgroundImage: CachedNetworkImageProvider(
+                  user!.photoUrl,
+                ),
+              ),
+              subtitle: Text(
+                user!.userName,
+                style: const TextStyle(
+                  color: Colors.white,
+                ),
+              ),
+              title: Text(
+                user!.displayName,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+          const Divider(
+            color: Colors.white54,
+            height: 2.0,
+          )
+        ],
+      ),
+    );
+  }
+}
